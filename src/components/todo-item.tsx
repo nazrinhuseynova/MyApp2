@@ -1,6 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
 
 interface TodoItemProps {
   id: string;
@@ -12,7 +16,7 @@ interface TodoItemProps {
 
 export function TodoItem({ id, text, completed, onToggle, onDelete }: TodoItemProps) {
   return (
-    <View style={styles.taskItem}>
+    <ThemedView type="backgroundElement" style={styles.taskItem}>
       <TouchableOpacity
         style={styles.taskTextContainer}
         onPress={() => onToggle(id)}
@@ -21,16 +25,16 @@ export function TodoItem({ id, text, completed, onToggle, onDelete }: TodoItemPr
           name={completed ? "checkbox" : "square-outline"}
           size={22}
           color={completed ? "#4CAF50" : "#888"}
-          style={{ marginRight: 10 }}
+          style={{ marginRight: Spacing.two }}
         />
-        <Text
+        <ThemedText
           style={[
             styles.taskText,
             completed && styles.completedTaskText,
           ]}
         >
           {text}
-        </Text>
+        </ThemedText>
       </TouchableOpacity>
 
       <View style={styles.iconContainer}>
@@ -38,35 +42,30 @@ export function TodoItem({ id, text, completed, onToggle, onDelete }: TodoItemPr
           <Ionicons
             name="checkmark-circle"
             size={24}
-            color={completed ? '#4CAF50' : '#ccc'}
+            color={completed ? '#4CAF50' : '#888'}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => onDelete(id)}
-          style={{ marginLeft: 15 }}
+          style={{ marginLeft: Spacing.three }}
         >
           <Ionicons name="trash" size={24} color="#ff5252" />
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   taskItem: {
-    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    borderColor: 'rgba(150, 150, 150, 0.2)',
   },
   taskTextContainer: {
     flex: 1,
@@ -75,11 +74,10 @@ const styles = StyleSheet.create({
   },
   taskText: {
     fontSize: 16,
-    color: '#333',
   },
   completedTaskText: {
     textDecorationLine: 'line-through',
-    color: '#888',
+    opacity: 0.5,
   },
   iconContainer: {
     flexDirection: 'row',
