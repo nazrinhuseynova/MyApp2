@@ -1,13 +1,22 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Platform, StyleSheet, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import { AnimatedIcon } from '@/components/animated-icon';
 import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
+import { TodoItem } from '@/components/todo-item';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,31 +38,79 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const [task, setTask] = useState<string>('');
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+ 
+  const addTask = () => {
+    if (task.trim() === '') {
+      Alert.alert('Diqqət', 'Zəhmət olmasa tapşırıq daxil edin!');
+      return;
+    }
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      text: task,
+      completed: false,
+    };
+
+    setTasks([...tasks, newTask]);
+    setTask('');
+  };
+
+  
+  const toggleTaskCompletion = (id: string) => {
+    setTasks(
+      tasks.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter((item) => item.id !== id));
+  };
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <AnimatedIcon />
           <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+            Todo List
           </ThemedText>
         </ThemedView>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        
+        <ThemedView style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Yeni tapşırıq yazın..."
+            placeholderTextColor="#888"
+            value={task}
+            onChangeText={(text) => setTask(text)}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
+          <TouchableOpacity style={styles.addButton} onPress={addTask}>
+            <Ionicons name="add" size={24} color="#fff" />
+          </TouchableOpacity>
         </ThemedView>
+
+        
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TodoItem
+              id={item.id}
+              text={item.text}
+              completed={item.completed}
+              onToggle={toggleTaskCompletion}
+              onDelete={deleteTask}
+            />
+          )}
+          contentContainerStyle={styles.listContainer}
+        />
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
@@ -78,21 +135,40 @@ const styles = StyleSheet.create({
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
+    maxHeight: 100,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.two,
   },
   title: {
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
+  inputContainer: {
+    flexDirection: 'row',
     alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: 'rgba(150, 150, 150, 0.1)',
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingVertical: Spacing.two,
+    borderRadius: Spacing.two,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(150, 150, 150, 0.2)',
+  },
+  addButton: {
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.two,
+    borderRadius: Spacing.two,
+  },
+  listContainer: {
+    alignSelf: 'stretch',
+    paddingBottom: Spacing.four,
+    gap: Spacing.two,
   },
 });
+
